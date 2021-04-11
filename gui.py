@@ -54,7 +54,7 @@ ser.reset_input_buffer()
 
 window = sg.Window(title="Temperature Readings", layout=layout)
 while True:
-    event, values = window.read()
+    event, values = window.read(timeout=10)
     # if ser.inWaiting() > 1:
     #     waiting = ser.inWaiting()
     #     current_temp = float(ser.read(waiting).decode())
@@ -82,6 +82,6 @@ while True:
         update_value("Max Temp", maxT, in_celsius)
         update_value("Min Temp", minT, in_celsius)
         update_value("Avg Temp", avgT, in_celsius)
-    if event == sg.WINDOW_CLOSED or event == 'Quit':
+    if event in (sg.WIN_CLOSED, "Quit"):
         break
 
