@@ -1,9 +1,9 @@
 // #include <SoftwareSerial.h>
 // SoftwareSerial node(A1, A0); 
- int tempPin = A0; 
+ #define tempPin A0 
+ #define voltPin A1 
  
- int voltPin = A1; 
- int voltValue;
+ int voltValue; 
  double dutyCycle = 145; 
  int minDutyCycle = 102; 
  int maxDutyCycle = 153;
@@ -24,7 +24,6 @@
   //either pin 3 or 11's PWM frequency to 31kHz
   TCCR2B = TCCR2B & B11111000 | B00000001;
 
-  
   pinMode(3, OUTPUT);      //sets pin 3 used for PWM to output
   pinMode(tempPin, INPUT); //sets pin A0 used to read temp to input
   pinMode(voltPin, INPUT); //sets pin A1 used to read battery voltage to input  
@@ -44,23 +43,14 @@ void loop() {
   if (voltValue > 737) {            //greater than 3.6V
     dutyCycle = dutyCycle - 2;   //decrease duty cycle
     dutyCycle = min(maxDutyCycle, dutyCycle);
-    
-    Serial.println("The duty cycle has DECREASED");
-    Serial.print("The voltage read: "); 
-    Serial.println(voltValue  * 0.004887);
-    Serial.print("The dutyCycle" );
-    Serial.print((dutyCycle / 255) * 100);
-    Serial.println("%");   
+    displayDecreaseInfo(); 
+  
     
   } else  {                      //less than 3.6V
     dutyCycle = dutyCycle + 2;   //increase duty cycle
     dutyCycle = max(minDutyCycle, dutyCycle);
-    Serial.println("The duty cycle has INCREASED"); 
-    Serial.print("The voltage read: "); 
-    Serial.println(voltValue * 0.004887);
-    Serial.print("The dutyCycle : ");
-    Serial.print((dutyCycle / 255) * 100);
-    Serial.println("%");  
+    displayIncreaeInfo(); 
+ 
   }
   analogWrite(3, dutyCycle);      //sets dutycycle to PWM pin
   
@@ -99,4 +89,22 @@ void loop() {
   Serial.println("C");
   Serial.println("_____________________");
   delay(1000);  
+}
+
+void displayIncreaeInfo() {
+    Serial.println("The duty cycle has INCREASED"); 
+    Serial.print("The voltage read: "); 
+    Serial.println(voltValue * 0.004887);
+    Serial.print("The dutyCycle: ");
+    Serial.print((dutyCycle / 255) * 100);
+    Serial.println("%"); 
+}
+
+void displayDecreaseInfo() {
+    Serial.println("The duty cycle has DECREASED");
+    Serial.print("The voltage read: "); 
+    Serial.println(voltValue  * 0.004887);
+    Serial.print("The dutyCycle: " );
+    Serial.print((dutyCycle / 255) * 100);
+    Serial.println("%"); 
 }
