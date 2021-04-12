@@ -66,7 +66,7 @@ while True:
     if poll:
         current_temp = float(ser.readline().decode())
         if in_celsius:
-            current_temp = change_unit(current_temp, in_celsius)
+            current_temp = change_unit(current_temp, not in_celsius)
         update_value("Current Temp", current_temp, in_celsius)
         total_temp += current_temp
         num_temps += 1
@@ -80,7 +80,7 @@ while True:
         update_value("Avg Temp", avgT, in_celsius)
     if event == "Start/Stop":
         poll = not poll
-    if event == "°C/°F":
+    if event == "°C/°F" and current_temp is not None:
         current_temp = change_unit(current_temp, in_celsius)
         minT = change_unit(minT, in_celsius)
         maxT = change_unit(maxT, in_celsius)

@@ -1,7 +1,11 @@
-// #include <SoftwareSerial.h>
-// SoftwareSerial node(A1, A0); 
+ #include <SoftwareSerial.h>
+ SoftwareSerial Bluetooth(4, 5); 
+ 
  #define tempPin A0 
  #define voltPin A1 
+ #define pwmPin 3
+ #define VALUES_READ 100
+ #define tempOutputPin 
  
  int voltValue; 
  double dutyCycle = 145; 
@@ -24,48 +28,40 @@
   //either pin 3 or 11's PWM frequency to 31kHz
   TCCR2B = TCCR2B & B11111000 | B00000001;
 
-  pinMode(3, OUTPUT);      //sets pin 3 used for PWM to output
+  pinMode(pwmPin, OUTPUT);      //sets pin 3 used for PWM to output
   pinMode(tempPin, INPUT); //sets pin A0 used to read temp to input
   pinMode(voltPin, INPUT); //sets pin A1 used to read battery voltage to input  
 
   //sets baudrate
   Serial.begin(9600);
+  Bluetooth.begin(9600); 
 }
 
 void loop() {
-
-  //writes  PWM signal to pin 3 (first parameter)
-  //with a duty cycle of the second parameter 
-  //divided by 255
 
   voltValue = analogRead(voltPin); 
   //BOOST CONVERTER VOLTAGE CONTROL
   if (voltValue > 737) {            //greater than 3.6V
     dutyCycle = dutyCycle - 2;   //decrease duty cycle
     dutyCycle = max(minDutyCycle, dutyCycle);
-    
-    displayDecreaseInfo(); 
-  
-    
+    //displayDecreaseInfo(); 
   } else  {                      //less than 3.6V
     dutyCycle = dutyCycle + 2;   //increase duty cycle
     dutyCycle = min(maxDutyCycle, dutyCycle);
-    displayIncreaeInfo(); 
+    //displayIncreaeInfo(); 
  
   }
   analogWrite(3, dutyCycle);      //sets dutycycle to PWM pin
-  
-   int numRead = 100;
 
    averageTempF = 0; 
    averageTempC = 0; 
    totalTempF = 0; 
    totalTempC = 0; 
    totalValue = 0; 
-   for (int i = 0; i < numRead; i++) {
+   for (int i = 0; i < VALUES_READ; i++) {
 
      tempValue = analogRead(tempPin);
-     delay(10); 
+//     delay(10); 
      totalValue = totalValue + tempValue; 
       
 
@@ -79,17 +75,20 @@ void loop() {
 
    } 
    
-  averageTempF = totalTempF / numRead; 
-  averageTempC = totalTempC / numRead;  
+  averageTempF = totalTempF / VALUES_READ; 
+  averageTempC = totalTempC / VALUES_READ;  
   //Serial.println("_____________________"); 
-  Serial.print("Temperature in F: ");
-  Serial.print(averageTempF); 
-  Serial.println("F");
-  Serial.print("Temperature in C: "); 
-  Serial.print(averageTempC);
-  Serial.println("C");
-  Serial.println("_____________________");
-  delay(1000);  
+//  Serial.print("Temperature in F: ");
+//  Serial.print(averageTempF); 
+//  Serial.println("F");
+//  Serial.print("Temperature in C: "); 
+//  Serial.print(averageTempC);
+//  Serial.println("C");
+//  Serial.println("_____________________");
+
+  Bluetooth.println(averageTempF); 
+  Serial.println(averageTempF); 
+//  delay(1000);  
 }
 
 void displayIncreaeInfo() {
