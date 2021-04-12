@@ -1,10 +1,11 @@
- #include <avr/sleep.h>//this AVR library contains the methods that controls the sleep modes
+ #include <SoftwareSerial.h>
+ SoftwareSerial Bluetooth(4, 5); 
  
- #define interruptPin 2 //Pin we are going to use to wake up the Arduino
  #define tempPin A0 
  #define voltPin A1 
  #define pwmPin 3
  #define VALUES_READ 100
+ #define tempOutputPin 
  
  int voltValue; 
  double dutyCycle = 145; 
@@ -33,15 +34,24 @@
 
   //sets baudrate
   Serial.begin(9600);
+  Bluetooth.begin(9600); 
 }
 
 void loop() {
 
-  //writes  PWM signal to pin 3 (first parameter)
-  //with a duty cycle of the second parameter 
-  //divided by 255
-
-  handleDutyCycle();
+  voltValue = analogRead(voltPin); 
+  //BOOST CONVERTER VOLTAGE CONTROL
+  if (voltValue > 737) {            //greater than 3.6V
+    dutyCycle = dutyCycle - 2;   //decrease duty cycle
+    dutyCycle = max(minDutyCycle, dutyCycle);
+    //displayDecreaseInfo(); 
+  } else  {                      //less than 3.6V
+    dutyCycle = dutyCycle + 2;   //increase duty cycle
+    dutyCycle = min(maxDutyCycle, dutyCycle);
+    //displayIncreaeInfo(); 
+ 
+  }
+  analogWrite(3, dutyCycle);      //sets dutycycle to PWM pin
 
    averageTempF = 0; 
    averageTempC = 0; 
@@ -68,13 +78,16 @@ void loop() {
   averageTempF = totalTempF / VALUES_READ; 
   averageTempC = totalTempC / VALUES_READ;  
   //Serial.println("_____________________"); 
-  Serial.print("Temperature in F: ");
-  Serial.print(averageTempF); 
-  Serial.println("F");
-  Serial.print("Temperature in C: "); 
-  Serial.print(averageTempC);
-  Serial.println("C");
-  Serial.println("_____________________");
+//  Serial.print("Temperature in F: ");
+//  Serial.print(averageTempF); 
+//  Serial.println("F");
+//  Serial.print("Temperature in C: "); 
+//  Serial.print(averageTempC);
+//  Serial.println("C");
+//  Serial.println("_____________________");
+
+  Serial.println(averageTempF); 
+  Bluetooth.println(averageTempF); 
   delay(1000);  
 }
 
@@ -94,38 +107,4 @@ void displayDecreaseInfo() {
     Serial.print("The dutyCycle: " );
     Serial.print((dutyCycle / 255) * 100);
     Serial.println("%"); 
-}
-
-void goToSleep() {
-  Serial.println("Going to sleep . . .");
-  delay(30); 
-  sleep_enable(); 
-  attachInterrupt(0, wakeUp, LOW); 
-  sleep_cpu();//activating sleep mode
-  Serial.println(". . .Waking up");//next line of code executed after the interrupt
-  
-}
-
-void wakeUp() {
-  Serial.println("Interrrupt Activated!");//Print message to serial monitor
-  sleep_disable();//Disable sleep mode
-  detachInterrupt(0); //Removes the interrupt from pin 2;
-}
-
-void handleDutyCycle () {
-    voltValue = analogRead(voltPin); 
-  //BOOST CONVERTER VOLTAGE CONTROL
-  if (voltValue > 737) {            //greater than 3.6V
-    dutyCycle = dutyCycle - 2;   //decrease duty cycle
-    dutyCycle = min(maxDutyCycle, dutyCycle);
-    displayDecreaseInfo(); 
-  
-    
-  } else  {                      //less than 3.6V
-    dutyCycle = dutyCycle + 2;   //increase duty cycle
-    dutyCycle = max(minDutyCycle, dutyCycle);
-    displayIncreaeInfo(); 
- 
-  }
-  analogWrite(3, dutyCycle);      //sets dutycycle to PWM pin
 }
