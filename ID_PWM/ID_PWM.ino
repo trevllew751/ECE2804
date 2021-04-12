@@ -42,13 +42,14 @@ void loop() {
   //BOOST CONVERTER VOLTAGE CONTROL
   if (voltValue > 737) {            //greater than 3.6V
     dutyCycle = dutyCycle - 2;   //decrease duty cycle
-    dutyCycle = min(maxDutyCycle, dutyCycle);
+    dutyCycle = max(minDutyCycle, dutyCycle);
+    
     displayDecreaseInfo(); 
   
     
   } else  {                      //less than 3.6V
     dutyCycle = dutyCycle + 2;   //increase duty cycle
-    dutyCycle = max(minDutyCycle, dutyCycle);
+    dutyCycle = min(maxDutyCycle, dutyCycle);
     displayIncreaeInfo(); 
  
   }
