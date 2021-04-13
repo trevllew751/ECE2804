@@ -2,7 +2,7 @@
 
  #include <SoftwareSerial.h>
  //#include <avr/sleep.h>//this AVR library contains the methods that controls the sleep modes
- SoftwareSerial Bluetooth(0, 1); // (RX, TX)
+ SoftwareSerial Bluetooth(4, 5); // (RX, TX)
 
 
  
@@ -121,21 +121,3 @@ void handleTempReadings() {
   Bluetooth.println(averageTempF); 
   delay(1000);
 }
-
-
-//void goToSleep() {
-//  Serial.println("Going to sleep . . .");
-//  delay(30); 
-//  set_sleep_mode(SLEEP_MODE_PWR_DOWN); 
-//  sleep_enable(); 
-//  //attachInterrupt(0, wakeUp, LOW); 
-//  sleep_cpu();//activating sleep mode
-//  Serial.println(". . .Waking up");//next line of code executed after the interrupt
-//  
-//}
-//
-//void wakeUp() {
-//  Serial.println("Interrrupt Activated!");//Print message to serial monitor
-//  sleep_disable();//Disable sleep mode
-//  //detachInterrupt(0); //Removes the interrupt from pin 2;
-//}
