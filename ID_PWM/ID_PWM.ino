@@ -1,6 +1,12 @@
+ #include <LowPower.h>
+
  #include <SoftwareSerial.h>
- SoftwareSerial Bluetooth(4, 5); 
+ //#include <avr/sleep.h>//this AVR library contains the methods that controls the sleep modes
+ SoftwareSerial Bluetooth(4, 5); // (RX, TX)
+
+
  
+ #define interruptPin 2 //Pin we are going to use to wake up the Arduino
  #define tempPin A0 
  #define voltPin A1 
  #define pwmPin 3
@@ -39,56 +45,10 @@
 
 void loop() {
 
-  voltValue = analogRead(voltPin); 
-  //BOOST CONVERTER VOLTAGE CONTROL
-  if (voltValue > 737) {            //greater than 3.6V
-    dutyCycle = dutyCycle - 2;   //decrease duty cycle
-    dutyCycle = max(minDutyCycle, dutyCycle);
-    //displayDecreaseInfo(); 
-  } else  {                      //less than 3.6V
-    dutyCycle = dutyCycle + 2;   //increase duty cycle
-    dutyCycle = min(maxDutyCycle, dutyCycle);
-    //displayIncreaeInfo(); 
- 
-  }
-  analogWrite(3, dutyCycle);      //sets dutycycle to PWM pin
-
-   averageTempF = 0; 
-   averageTempC = 0; 
-   totalTempF = 0; 
-   totalTempC = 0; 
-   totalValue = 0; 
-   for (int i = 0; i < VALUES_READ; i++) {
-
-     tempValue = analogRead(tempPin);
-//     delay(10); 
-     totalValue = totalValue + tempValue; 
-      
-
-     //converting analog readings to C and F temps
-     double voltOut = tempValue * 0.004887;                  //convert analog value to voltage
-     double actTempC =  (voltOut - OUTPUTatZERO) / TEMPCOFF; //convert voltage to temp in C based on equation in data sheet
-     double actTempF = actTempC * 9/5 + 32;                  //convert C temp to F temp
- 
-     totalTempF = totalTempF + actTempF; 
-     totalTempC = totalTempC + actTempC;
-
-   } 
-   
-  averageTempF = totalTempF / VALUES_READ; 
-  averageTempC = totalTempC / VALUES_READ;  
-  //Serial.println("_____________________"); 
-//  Serial.print("Temperature in F: ");
-//  Serial.print(averageTempF); 
-//  Serial.println("F");
-//  Serial.print("Temperature in C: "); 
-//  Serial.print(averageTempC);
-//  Serial.println("C");
-//  Serial.println("_____________________");
-
-  Bluetooth.println(averageTempF); 
-  Serial.println(averageTempF); 
-//  delay(1000);  
+//  for(int i = 0; i < 4; i++) {
+//      LowPower.powerStandby(SLEEP_8S, ADC_OFF, BOD_OFF);
+//  }    
+  handleTempReadings(); 
 }
 
 void displayIncreaeInfo() {
@@ -107,4 +67,57 @@ void displayDecreaseInfo() {
     Serial.print("The dutyCycle: " );
     Serial.print((dutyCycle / 255) * 100);
     Serial.println("%"); 
+}
+
+void handleTempReadings() {
+  voltValue = analogRead(voltPin); 
+  //BOOST CONVERTER VOLTAGE CONTROL
+  if (voltValue > 737) {            //greater than 3.6V
+    dutyCycle = dutyCycle - 2;   //decrease duty cycle
+    dutyCycle = max(minDutyCycle, dutyCycle);
+    displayDecreaseInfo(); 
+  } else  {                      //less than 3.6V
+    dutyCycle = dutyCycle + 2;   //increase duty cycle
+    dutyCycle = min(maxDutyCycle, dutyCycle);
+    displayIncreaeInfo(); 
+ 
+  }
+  analogWrite(3, dutyCycle);      //sets dutycycle to PWM pin
+
+   averageTempF = 0; 
+   averageTempC = 0; 
+   totalTempF = 0; 
+   totalTempC = 0; 
+   totalValue = 0; 
+   for (int i = 0; i < VALUES_READ; i++) {
+
+     tempValue = analogRead(tempPin);
+     delay(10); 
+     totalValue = totalValue + tempValue; 
+      
+
+     //converting analog readings to C and F temps
+     double voltOut = tempValue * 0.004887;                  //convert analog value to voltage
+     double actTempC =  (voltOut - OUTPUTatZERO) / TEMPCOFF; //convert voltage to temp in C based on equation in data sheet
+     double actTempF = actTempC * 9/5 + 32;                  //convert C temp to F temp
+ 
+     totalTempF = totalTempF + actTempF; 
+     totalTempC = totalTempC + actTempC;
+
+   } 
+   
+  averageTempF = totalTempF / VALUES_READ; 
+  averageTempC = totalTempC / VALUES_READ;  
+  Serial.println("_____________________"); 
+  Serial.print("Temperature in F: ");
+  Serial.print(averageTempF); 
+  Serial.println("F");
+  Serial.print("Temperature in C: "); 
+  Serial.print(averageTempC);
+  Serial.println("C");
+  Serial.println("_____________________");
+
+  //Serial.println(averageTempF); 
+  Bluetooth.println(averageTempF); 
+  delay(1000);
 }
