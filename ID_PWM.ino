@@ -133,7 +133,7 @@ void handleTempReadings() {
 void sleepForThirtySecs() {
 
     for(int i = 0; i < 4; i++) {
-      LowPower.powerStandby(SLEEP_8S, ADC_OFF, BOD_OFF);
+      LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
   } 
   
 }
